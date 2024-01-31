@@ -1,15 +1,14 @@
 # klipper-backup 💾
-Klipper backup script for manual or automated GitHub backups
+Klipper backup script for manual or automated GitHub backups for the Creality K1
 
 This is a backup script to create manual or automated klipper backups in a github repository. You can [see an example](https://github.com/Staubgeborener/3dprint) of what it looks like in the end.
 
-## RTFM
-I would suggest reading the [docs](https://staubgeborener.github.io/klipper-backup), as this provides detailed step-by-step instructions.
+## Install
+To install the script, please first create a github account, create a new repository and generate a personal access token. 
 
-> [!IMPORTANT]  
-> If you have already used the script before release 1.0, please read [this wiki article](https://staubgeborener.github.io/klipper-backup/migration) before opening an issue!
+[Here is a guide for creating the token.](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) Please remember that you can only see the token once, if you leave the page you cannot see it again and will need to generate a new token. 
 
-## YouTube
-The user [Minimal 3DP](https://github.com/minimal3dp) has created a video about the initial setup and use of klipper-backup and made it available on YouTube. This and the wiki should explain many questions in advance.
-
-[![The Ultimate Guide to Using Klipper Macros to Backup Your Configuration Files](https://img.youtube.com/vi/J4_dlCtZY48/0.jpg)](https://www.youtube.com/watch?v=J4_dlCtZY48 "The Ultimate Guide to Using Klipper Macros to Backup Your Configuration Files")
+Once you have a token ready ssh to your K1 and enter:
+```
+wget --no-check-certificate https://raw.githubusercontent.com/lokiagent/klipper-backup/main/install-backup.sh && chmod +x install-backup.sh && sh install-backup.sh
+```

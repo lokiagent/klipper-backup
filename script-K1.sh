@@ -1,13 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/sh -v
 
 # Set parent directory path
-parent_path=$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)
+parent_path=/usr/data/klipper-backup
+# Set K1 directory location (Klipper and related files are not stored in /home/$user)
+usrdata=/usr/data
+klipperconfig=/usr/data/printer_data/config
 
 # Initialize variables from .env file
 source "$parent_path"/.env
 
 backup_folder="config_backup"
-backup_path="$HOME/$backup_folder"
+backup_path="/usr/data/$backup_folder"
 
 # Check for updates
 [ $(git -C "$parent_path" rev-parse HEAD) = $(git -C "$parent_path" ls-remote $(git -C "$parent_path" rev-parse --abbrev-ref @{u} | \
@@ -68,48 +71,15 @@ if git ls-remote --exit-code --heads origin $branch_name > /dev/null 2>&1; then
     find "$backup_path" -maxdepth 1 -mindepth 1 ! -name '.git' -exec rm -rf {} \;
 fi
 
-cd "$HOME"
-while IFS= read -r path; do
-    # Check if path is a directory or not a file (needed for /* checking as /* treats the path as not a directory)
-    if [[ -d "$HOME/$path" || ! -f "$HOME/$path" ]]; then
-        # Check if path does not end in /* or /
-        if [[ ! "$path" =~ /\*$ && ! "$path" =~ /$ ]]; then
-            path="$path/*"
-            elif [[ ! "$path" =~ \$ && ! "$path" =~ /\*$ ]]; then
-            path="$path*"
-        fi
-    fi
-    # Check if path contains files
-    if compgen -G "$HOME/$path" > /dev/null; then
-        # Iterate over every file in the path
-        for file in $path; do
-            # Check if it's a symbolic link
-            if [ -h "$file" ]; then
-                echo "Skipping symbolic link: $file"
-                # Check if file is an extra backup of printer.cfg moonraker/klipper seems to like to make 4-5 of these sometimes no need to back them all up as well.
-                elif [[ $(basename "$file") =~ ^printer-[0-9]+_[0-9]+\.cfg$ ]]; then
-                echo "Skipping file: $file"
-            else
-                cp -r --parents "$file" "$backup_path/"
-            fi
-        done
-    fi
-done < <(grep -v '^#' "$parent_path/.env" | grep 'path_' | sed 's/^.*=//')
+cp -af "$klipperconfig" "$backup_path/"
 
-cp "$parent_path"/.gitignore "$backup_path/.gitignore"
+cp -af "$parent_path"/.gitignore "$backup_path/.gitignore"
 
 # Create and add Readme to backup folder
-echo -e "# klipper-backup 💾 \nKlipper backup script for manual or automated GitHub backups \n\nThis backup is provided by [klipper-backup](https://github.com/Staubgeborener/klipper-backup)." > "$backup_path/README.md"
+echo -e "# klipper-backup 💾 \nKlipper backup script for manual or automated GitHub backups \n\nThis backup is provided by [klipper-backup](https://github.com/Staubgeborener/klipper-backup).\n\nAdapted for Creality K1 by lokiagent." > "$backup_path/README.md"
 
 # Individual commit message, if no parameter is set, use the current timestamp as commit message
-timezone=$(timedatectl | grep "Time zone" | awk '{print $3}')
-if [ -n "$1" ]; then
-    commit_message="$@"
-    elif [[ "$timezone" == *"America"* ]]; then
-    commit_message="New backup from $(date +"%m-%d-%y")"
-else
-    commit_message="New backup from $(date +"%d-%m-%y")"
-fi
+commit_message="New backup from $(date +"%d-%m-%y")"
 
 cd "$backup_path"
 git add .
