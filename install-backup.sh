@@ -95,5 +95,7 @@ EOF
         ;;
 
         *) echo invalid response;;
-
+           esac
+           ;;
+        esac
             
